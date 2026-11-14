@@ -1,0 +1,22 @@
+{
+  "name": "oceanstay-backend",
+  "version": "1.0.0",
+  "description": "This is backend for oceanstay project",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node src/server.ts",
+    "start:dev": "nodemon --exec ts-node src/server.ts",
+    "build": "tsc && node extra.js",
+    "start:prod": "node dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
