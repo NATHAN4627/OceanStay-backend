@@ -8,7 +8,7 @@ import cookieParser from "cookie-parser";
 
 // 1.Entrance
 const app = express();
-//app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 //app.use("/uploads", express.static("./uploads"));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
