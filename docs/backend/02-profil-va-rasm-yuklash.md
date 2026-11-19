@@ -2,7 +2,7 @@
 
 `src/libs/uploads.ts` da `makeUploader(address)` bitta Multer sozlamasidan turli papkalar uchun foydalanadi. Backend avatar uchun `makeUploader("member")`, xona rasmi uchun `makeUploader("rooms")` chaqiradi. Fayllar mos ravishda `uploads/member` va `uploads/rooms` ichiga yoziladi.
 
-## 1. Rasm uchun fayl filtrini yozish
+## 1. Rasm filtrining boshlang‘ich mashqi
 
 `.jpg` va `.jpeg` JPEG formatining ikki kengaytmasi. Ikkalasi uchun MIME turi `image/jpeg`. PNG uchun `.png` va `image/png` mos keladi. Kengaytmani kichik harfga o‘tkazish `.JPG` kabi fayllarni ham qabul qilishga imkon beradi. [IANA JPEG](https://www.iana.org/assignments/media-types/image/jpeg) · [IANA PNG](https://www.iana.org/assignments/media-types/image/png)
 
@@ -68,16 +68,16 @@ const makeUploader = (address: ImageFolder) => {
 
 ## 2. Profil amallari uchun marshrutlar
 
-OceanStay API’sida barcha ma’lumot o‘qish marshrutlari `GET`. Yaratish, yangilash va o‘chirish amallari `POST`. Quyidagi nomlar keyingi darslar uchun tanlandi va ularni loyiha uslubiga moslab o‘zgartirish mumkin.
+OceanStay API’sida barcha ma’lumot o‘qish marshrutlari `GET`. Yaratish, yangilash va o‘chirish amallari `POST`. Joriy implementatsiyada uchala tahrirlash amali bitta marshrutda ishlaydi.
 
 | Amal | Marshrut | Postman body |
 | --- | --- | --- |
 | Profilni o‘qish | `GET /member/info` | Cookie orqali faol sessiya. |
-| Nickname va profil matnini o‘zgartirish | `POST /member/me/update` | JSON, masalan `{ "memberNick": "OceanGuest" }`. |
-| Avatarni o‘zgartirish | `POST /member/me/avatar` | `form-data`, `memberImage` nomli **File**. |
-| Parolni o‘zgartirish | `POST /member/me/password` | JSON, `currentPassword` va `newPassword`. Service joriy parolni bcrypt bilan tekshiradi. |
+| Nickname’ni o‘zgartirish | `POST /member/update` | JSON, masalan `{ "memberNick": "OceanGuest" }`. |
+| Avatarni o‘zgartirish | `POST /member/update` | `form-data`, `memberImage` nomli **File**. |
+| Parolni o‘zgartirish | `POST /member/update` | JSON, `currentPassword` va `newPassword`. Service joriy parolni bcrypt bilan tekshiradi. |
 
-Har bir marshrut `verifyAuth`dan boshlanadi va member ID’si sessiyadan olinadi. Avatar uchun tartib `verifyAuth → makeUploader("member").single("memberImage") → avatar controller → MemberService`. Member modelidagi `memberImage`ga tekshirilgan rasmning nisbiy manzili yoziladi.
+Har bir marshrut `verifyAuth`dan boshlanadi va member ID’si sessiyadan olinadi. Yangilash tartibi `verifyAuth → makeUploader("member", 4).single("memberImage") → updateMember → MemberService`. Joriy uploader to‘rtta matn maydoniga ruxsat beradi va mos kelmagan formatga `400` qaytaradi. Member modelidagi `memberImage`ga tekshirilgan rasmning nisbiy manzili yoziladi.
 
 Hozir `files: 1` va `fields: 0` avatarga mos. Xonalar bosqichida bir nechta rasm bitta so‘rovda qabul qilinsa, xona marshruti uchun rasm soni chegarasini o‘sha bosqichda sozlaymiz.
 
@@ -85,6 +85,6 @@ Hozir `files: 1` va `fields: 0` avatarga mos. Xonalar bosqichida bir nechta rasm
 
 `/signup`, `/login` va `/logout` yozilgan. `verifyAuth` hozir member’ni JWT ichidan oladi. Navbatdagi darsda member ID’sini MongoDB’dan tekshiramiz va `GET /member/info` yozamiz. [Sessiyani tekshirish darsi](03-auth-sessiya-va-profil.md)
 
-Avatar marshruti ulanganidan keyin Postman’da haqiqiy JPEG va PNG, GIF, mos kelmaydigan kengaytma, hajmi chegaradan katta fayl va cookiesiz so‘rov bilan tekshiramiz.
+Joriy avatar va profil so‘rovlari uchun [Telefon orqali login va profilni yangilash](05-profilni-yangilash.md) darsidagi Postman sinovlarini ishlating.
 
 Multer filtri vaqtinchalik nusxada TypeScript va multipart sinovlaridan o‘tdi. Ikkala papkaga yozish, format va MIME mosligi, hajm chegarasi hamda yangi namuna bilan papkaning birinchi qabul qilingan yuklashda yaratilishi tekshirildi.

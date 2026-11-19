@@ -6,6 +6,8 @@ export enum HttpCode {
   UNAUTHORIZED = 401,
   FORBIDDEN = 403,
   NOT_FOUND = 404,
+  CONFLICT = 409,
+  PAYLOAD_TOO_LARGE = 413,
   INTERNAL_SERVER_ERROR = 500,
 }
 
@@ -14,11 +16,16 @@ export enum Message {
   NO_DATA_FOUND = "No data is found!",
   CREATE_FAILED = "Create is failed!",
   UPDATE_FAILED = "Update is failed!",
-  WRONG_PSWD_NICK = "Member nick or password wrong!",
+  WRONG_PSWD_PHONE = "Member phone or password wrong!",
+  WRONG_CURRENT_PASSWORD = "Current password is incorrect.",
+  INVALID_PROFILE_UPDATE = "Provide a nickname, address, image, or a valid password change.",
+  INVALID_MEMBER_IMAGE = "Upload a JPEG or PNG image.",
   USED_PHONE = "Already used phone!",
   NOT_AUTH = "You are not authenticated, Please login first!",
   BLOCKED_USER = "You are blocked by admin!",
   TOKEN_CREATION_FAILED = "Token creation error!",
+  WRONG_PSWD_NICK = "WRONG_PSWD_NICK!",
+  WRONG_CURRENT_PSWD = "Current password wong!",
 }
 
 class Errors extends Error {

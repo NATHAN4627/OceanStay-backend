@@ -37,10 +37,6 @@ const memberSchema = new Schema<Member>(
       type: String,
     },
 
-    memberDesc: {
-      type: String,
-    },
-
     memberImage: {
       type: String,
     },

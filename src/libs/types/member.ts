@@ -10,7 +10,6 @@ export interface Member {
   memberPhone: string;
   memberPassword?: string;
   memberAddress?: string;
-  memberDesc?: string;
   memberImage?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -23,29 +22,24 @@ export interface MemberInput {
   memberPhone: string;
   memberPassword: string;
   memberAddress?: string;
-  memberDesc?: string;
   memberImage?: string;
 }
 
 export interface MemberUpdateInput {
   _id: ObjectId;
-  memberStatus?: MemberStatus;
   memberNick?: string;
-  memberPhone?: string;
-  memberPassword?: string;
   memberAddress?: string;
-  memberDesc?: string;
   memberImage?: string;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 export interface LoginInput {
-  memberNick: string;
+  memberPhone: string;
   memberPassword: string;
 }
 
 export interface ExtendedRequest extends Request {
   [x: string]: any;
   member: Member;
-  //file: Express.Multer.File;
-  //files: Express.Multer.File[];
 }

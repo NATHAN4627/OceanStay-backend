@@ -7,7 +7,7 @@ Bu qo‘llanma OceanStay backendini qo‘lda yozib, har bir qadamni Postman’da
 | Endpoint | Oqim |
 | --- | --- |
 | `POST /signup` | `MemberService` parolni hash qiladi va member yaratadi. Controller JWT yaratib, `accessToken` cookie’ni o‘rnatadi. |
-| `POST /login` | `MemberService` nickname va parolni tekshiradi. Controller JWT va `accessToken` cookie’ni qaytaradi. |
+| `POST /login` | `MemberService` telefon va parolni tekshiradi. Controller JWT va `accessToken` cookie’ni qaytaradi. |
 | `POST /logout` | `verifyAuth` cookie’dagi JWT’ni tekshiradi. Logout controller cookie’ni tugatadi. |
 
 `app.ts` router’ni `/` ostida ulaydi. Arxitektura faylidagi `/api/member/…` nomlari loyiha rejasi sifatida qoladi. Postman’da hozir `http://localhost:3333` ishlatiladi. `PORT` sozlangan bo‘lsa, o‘sha portni yozing.
@@ -102,7 +102,7 @@ Marshrut nomini o‘zgartirsangiz, Postman URL’ini ham moslang. Multipart mayd
 ### 4. Postman’da tekshiring
 
 1. `npx tsc --noEmit` bilan tiplarni tekshiring. Serverni `npm run start:dev` orqali ishga tushiring.
-2. `POST http://localhost:3333/login` ga **Body → raw → JSON** orqali test akkauntingizning `memberNick` va `memberPassword` maydonlarini yuboring. Kerak bo‘lsa, avval `POST /signup` orqali `memberNick`, `memberPhone` va `memberPassword` bilan test akkaunt oching. Login javobidan keyin Postman cookie jar’da `accessToken`ni ko‘ring. Ikkala so‘rov uchun ham bir xil host ishlating.
+2. `POST http://localhost:3333/login` ga **Body → raw → JSON** orqali test akkauntingizning `memberPhone` va `memberPassword` maydonlarini yuboring. Kerak bo‘lsa, avval `POST /signup` orqali `memberNick`, `memberPhone` va `memberPassword` bilan test akkaunt oching. Login javobidan keyin Postman cookie jar’da `accessToken`ni ko‘ring. Ikkala so‘rov uchun ham bir xil host ishlating.
 3. `POST http://localhost:3333/member/me/avatar/check` da **Body → form-data** tanlang. **Key** ustunida `memberImage` yozing, turini **File**ga o‘zgartiring va 2 MiB dan kichik rasm tanlang. `Content-Type` va multipart boundary qiymatini Postman so‘rovga o‘zi qo‘shadi. [Postman form-data](https://learning.postman.com/docs/use/send-requests/create-requests/parameters) · [Postman cookie jar](https://learning.postman.com/v11/docs/use/send-requests/response-data/cookies)
 
 | Sinov | Kutiladigan javob |
