@@ -1,5 +1,6 @@
 import { ObjectId } from "mongoose";
 import { MemberType, MemberStatus } from "../enums/member.enum";
+import type { Request } from "express";
 
 export interface Member {
   _id: ObjectId;

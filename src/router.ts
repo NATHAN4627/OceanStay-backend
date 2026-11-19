@@ -7,4 +7,10 @@ router.post("/signup", memberController.signup);
 router.post("/login", memberController.login);
 router.post("/logout", memberController.verifyAuth, memberController.logout);
 
+router.get(
+  "/member/info",
+  memberController.verifyAuth,
+  memberController.getMember,
+);
+
 export default router;

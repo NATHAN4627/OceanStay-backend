@@ -116,7 +116,7 @@ Hujjatdagi kod bo‘laklari vaqtinchalik loyiha nusxasida TypeScript tekshiruvid
 
 ## Keyingi backend bosqichlari
 
-1. Auth’ni tugatish. Signup’da ruxsat berilgan maydonlarni tanlash, `HttpOnly` cookie, kichik JWT payload, joriy akkauntni MongoDB’dan tekshiradigan `verifyAuth`, `GET /me` va rol tekshiruvi. Hozir signup body’dagi `memberType` va `memberStatus` modelga uzatiladi, `verifyAuth` esa tokendagi member ma’lumotiga tayanadi. Admin seed va Postman kolleksiyasi joriy checkout’da hali yo‘q.
+1. Auth’ni tugatish. Signup’da ruxsat berilgan maydonlarni tanlash, `HttpOnly` cookie, kichik JWT payload, joriy akkauntni MongoDB’dan tekshiradigan `verifyAuth`, `GET /member/me` va rol tekshiruvi. Hozir signup body’dagi `memberType` va `memberStatus` modelga uzatiladi, `verifyAuth` esa tokendagi member ma’lumotiga tayanadi. Admin seed va Postman kolleksiyasi joriy checkout’da hali yo‘q. [Sessiyani tekshirish darsi](03-auth-sessiya-va-profil.md)
 2. Profilni tahrirlash. Profil matn maydonlari, avatarni saqlash va joriy parolni tekshirib parolni alohida o‘zgartirish.
 3. Admin va xonalar. Xonalar CRUD’i, member holatini boshqarish, katalog, filter va pagination.
 4. Bronlash. Sana bo‘yicha mavjudlik, narx, bandlik to‘qnashuvi, bekor qilish va tarix.

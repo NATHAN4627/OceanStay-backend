@@ -1,3 +1,4 @@
+import { shapeIntoMongooseObjectId } from "../libs/config";
 import { MemberStatus } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { LoginInput, Member, MemberInput } from "../libs/types/member";
@@ -52,6 +53,22 @@ class MemberService {
 
     const result = await this.memberModel.findById(member._id).lean().exec();
     return result as Member;
+  }
+
+  public async getActiveMember(id: string): Promise<Member> {
+    const memberId = shapeIntoMongooseObjectId(id);
+
+    const member = await this.memberModel.findById(memberId).lean().exec();
+
+    if (member?.memberStatus === MemberStatus.BLOCK) {
+      throw new Errors(HttpCode.FORBIDDEN, Message.BLOCKED_USER);
+    }
+
+    if (!member || member.memberStatus !== MemberStatus.ACTIVE) {
+      throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTH);
+    }
+
+    return member;
   }
 }
 

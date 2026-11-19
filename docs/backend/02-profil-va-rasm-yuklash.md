@@ -1,27 +1,37 @@
 # 02. Profil va rasm yuklash
 
-`src/libs/uploads.ts` da `makeUploader(address)` bitta Multer sozlamasidan turli papkalar uchun foydalanadi. `address` backend kodi belgilaydigan qiymat. Member avatari uchun `"member"` ishlatamiz.
+`src/libs/uploads.ts` da `makeUploader(address)` bitta Multer sozlamasidan turli papkalar uchun foydalanadi. Backend avatar uchun `makeUploader("member")`, xona rasmi uchun `makeUploader("rooms")` chaqiradi. Fayllar mos ravishda `uploads/member` va `uploads/rooms` ichiga yoziladi.
 
 ## 1. Rasm uchun fayl filtrini yozish
 
 `.jpg` va `.jpeg` JPEG formatining ikki kengaytmasi. Ikkalasi uchun MIME turi `image/jpeg`. PNG uchun `.png` va `image/png` mos keladi. Kengaytmani kichik harfga o‘tkazish `.JPG` kabi fayllarni ham qabul qilishga imkon beradi. [IANA JPEG](https://www.iana.org/assignments/media-types/image/jpeg) · [IANA PNG](https://www.iana.org/assignments/media-types/image/png)
 
-`src/libs/uploads.ts` ichida importlardan keyin ruxsat etilgan juftliklarni yozing.
+`src/libs/uploads.ts` ichidagi `imageMimeExtensions` ruxsat etilgan juftliklarni belgilaydi.
 
 ```ts
-const imageMimeByExtension = new Map([
+const imageMimeExtensions = new Map([
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".png", "image/png"],
 ]);
 ```
 
-`getTargetImageStorage` funksiyasini yangilang. `destination` satr bo‘lsa, Multer papkani yaratadi. Fayl nomi UUID va kichik harfdagi kengaytmadan hosil bo‘ladi. [Express Multer qo‘llanmasi](https://expressjs.com/en/resources/middleware/multer/#diskstorage)
+`destination: path.resolve("uploads", address)` papkani `makeUploader` chaqirilgan paytda yaratadi. Har bir papka birinchi qabul qilingan fayl bilan yaratilishi uchun `destination` callback ichida `mkdir` ishlating. `recursive: true` yuqoridagi `uploads` papkasini ham yaratadi va papka mavjud paytda davom etishga imkon beradi. [Express Multer qo‘llanmasi](https://expressjs.com/en/resources/middleware/multer/#diskstorage) · [Node.js mkdir](https://nodejs.org/api/fs.html#fsmkdirpath-options-callback)
 
 ```ts
-function getTargetImageStorage(address: string) {
+import { mkdir } from "node:fs";
+
+type ImageFolder = "member" | "rooms";
+
+function getTargetImageStorage(address: ImageFolder) {
+  const directory = path.resolve("uploads", address);
+
   return multer.diskStorage({
-    destination: path.resolve("uploads", address),
+    destination(_req, _file, cb) {
+      mkdir(directory, { recursive: true }, (error) => {
+        cb(error, directory);
+      });
+    },
     filename(_req, file, cb) {
       const extension = path.extname(file.originalname).toLowerCase();
       cb(null, v4() + extension);
@@ -33,13 +43,13 @@ function getTargetImageStorage(address: string) {
 `makeUploader` funksiyasini yangilang. `export default makeUploader` fayl oxirida turadi.
 
 ```ts
-const makeUploader = (address: string) => {
+const makeUploader = (address: ImageFolder) => {
   return multer({
     storage: getTargetImageStorage(address),
     limits: { files: 1, fields: 0, fileSize: 2 * 1024 * 1024 },
     fileFilter(_req, file, cb) {
       const extension = path.extname(file.originalname).toLowerCase();
-      cb(null, imageMimeByExtension.get(extension) === file.mimetype);
+      cb(null, imageMimeExtensions.get(extension) === file.mimetype);
     },
   });
 };
@@ -54,23 +64,27 @@ const makeUploader = (address: string) => {
 | `uuid@14.0.3` | `v4()` yangi fayl nomi uchun UUID yaratadi. |
 | `@types/uuid@10.0.0` | Paketlar ro‘yxatida bor. |
 | `path` | Node.js ichidagi modul. Fayl kengaytmasi va papka manzilini olish uchun ishlatiladi. |
+| `node:fs` | Node.js ichidagi modul. `mkdir` birinchi fayl kelganda papkani yaratadi. |
 
 ## 2. Profil amallari uchun marshrutlar
 
-Quyidagi marshrutlar hali yozilmagan. Nomlarni loyiha uslubiga moslab o‘zgartirish mumkin.
+OceanStay API’sida barcha ma’lumot o‘qish marshrutlari `GET`. Yaratish, yangilash va o‘chirish amallari `POST`. Quyidagi nomlar keyingi darslar uchun tanlandi va ularni loyiha uslubiga moslab o‘zgartirish mumkin.
 
 | Amal | Marshrut | Postman body |
 | --- | --- | --- |
-| Nickname va profil matnini o‘zgartirish | `PATCH /member/me` | JSON, masalan `{ "memberNick": "OceanGuest" }`. |
-| Avatarni o‘zgartirish | `PATCH /member/me/avatar` | `form-data`, `memberImage` nomli **File**. |
-| Parolni o‘zgartirish | `PATCH /member/me/password` | JSON, `currentPassword` va `newPassword`. Service joriy parolni bcrypt bilan tekshiradi. |
+| Profilni o‘qish | `GET /member/info` | Cookie orqali faol sessiya. |
+| Nickname va profil matnini o‘zgartirish | `POST /member/me/update` | JSON, masalan `{ "memberNick": "OceanGuest" }`. |
+| Avatarni o‘zgartirish | `POST /member/me/avatar` | `form-data`, `memberImage` nomli **File**. |
+| Parolni o‘zgartirish | `POST /member/me/password` | JSON, `currentPassword` va `newPassword`. Service joriy parolni bcrypt bilan tekshiradi. |
 
 Har bir marshrut `verifyAuth`dan boshlanadi va member ID’si sessiyadan olinadi. Avatar uchun tartib `verifyAuth → makeUploader("member").single("memberImage") → avatar controller → MemberService`. Member modelidagi `memberImage`ga tekshirilgan rasmning nisbiy manzili yoziladi.
 
+Hozir `files: 1` va `fields: 0` avatarga mos. Xonalar bosqichida bir nechta rasm bitta so‘rovda qabul qilinsa, xona marshruti uchun rasm soni chegarasini o‘sha bosqichda sozlaymiz.
+
 ## 3. Auth’dan profilga o‘tish
 
-`/signup`, `/login` va `/logout` yozilgan. `verifyAuth` hozir member’ni JWT ichidan oladi. Keyingi darsda token orqali topilgan member ID’sini MongoDB’dan tekshiramiz. Faol akkaunt `GET /me` orqali profilini oladi, bloklangan akkaunt `403`, yo‘q yoki yaroqsiz sessiya `401` oladi. Signup maydonlarini serverda tanlab, rol va holatni server belgilaydi. Signup va login cookie’lari uchun `HttpOnly` sozlanadi.
+`/signup`, `/login` va `/logout` yozilgan. `verifyAuth` hozir member’ni JWT ichidan oladi. Navbatdagi darsda member ID’sini MongoDB’dan tekshiramiz va `GET /member/info` yozamiz. [Sessiyani tekshirish darsi](03-auth-sessiya-va-profil.md)
 
 Avatar marshruti ulanganidan keyin Postman’da haqiqiy JPEG va PNG, GIF, mos kelmaydigan kengaytma, hajmi chegaradan katta fayl va cookiesiz so‘rov bilan tekshiramiz.
 
-Qo‘llanmadagi Multer kodi vaqtinchalik nusxada TypeScript tekshiruvidan o‘tdi. Multipart sinovlarida kengaytma va MIME mosligi, aynan 2 MiB hajm hamda chegaradan oshgan fayl tekshirildi.
+Multer filtri vaqtinchalik nusxada TypeScript va multipart sinovlaridan o‘tdi. Ikkala papkaga yozish, format va MIME mosligi, hajm chegarasi hamda yangi namuna bilan papkaning birinchi qabul qilingan yuklashda yaratilishi tekshirildi.

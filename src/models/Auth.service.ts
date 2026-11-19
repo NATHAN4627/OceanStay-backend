@@ -21,20 +21,26 @@ class AuthService {
         (err, token) => {
           if (err)
             reject(
-              new Errors(HttpCode.UNAUTHORIZED, Message.TOKEN_CREATION_FAILED)
+              new Errors(HttpCode.UNAUTHORIZED, Message.TOKEN_CREATION_FAILED),
             );
           else resolve(token as string);
-        }
+        },
       );
     });
   }
 
-  public async verifyAuth(token: string): Promise<Member> {
-    const result: Member = jwt.verify(
-      token,
-      this.secretToken as string
-    ) as Member;
-    return result;
+  public async verifyAuth(token: string): Promise<string> {
+    try {
+      const result = jwt.verify(token, this.secretToken as string);
+
+      if (typeof result !== "string" && typeof result._id === "string") {
+        return result._id;
+      }
+    } catch (err) {
+      if (!(err instanceof jwt.JsonWebTokenError)) throw err;
+    }
+
+    throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTH);
   }
 }
 
