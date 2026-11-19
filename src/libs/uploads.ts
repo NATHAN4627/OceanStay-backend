@@ -11,11 +11,9 @@ const imageMimeExtensions = new Map([
 //universal uploader
 function getTargetImageStorage(address: any) {
   return multer.diskStorage({
-    destination: () => {
-      path.resolve("uploads", address);
-    },
-    filename: function (req, file, cb) {
-      const extension = path.parse(file.originalname).ext;
+    destination: path.resolve("uploads", address),
+    filename(_req, file, cb) {
+      const extension = path.extname(file.originalname).toLocaleLowerCase();
       const random_name = v4() + extension;
       cb(null, random_name);
     },
