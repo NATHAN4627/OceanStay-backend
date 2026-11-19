@@ -1,6 +1,7 @@
 import express from "express";
 import memberController from "./controller/member.controller";
 import uploader from "./libs/uploads";
+import adminController from "./controller/admin.controller";
 
 const router = express.Router();
 
@@ -20,6 +21,22 @@ router.post(
   memberController.verifyAuth,
   uploader("member").single("memberImage"),
   memberController.updateMember,
+);
+
+/** ADMIN */
+
+router.get(
+  "/admin/members",
+  memberController.verifyAuth,
+  adminController.verifyAdmin,
+  adminController.getMembers,
+);
+
+router.post(
+  "/admin/members/status/:memberId",
+  memberController.verifyAuth,
+  adminController.verifyAdmin,
+  adminController.updateMemberStatus,
 );
 
 export default router;

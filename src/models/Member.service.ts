@@ -1,10 +1,12 @@
+import { ObjectId } from "mongoose";
 import { shapeIntoMongooseObjectId } from "../libs/config";
-import { MemberStatus } from "../libs/enums/member.enum";
+import { MemberStatus, MemberType } from "../libs/enums/member.enum";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import {
   LoginInput,
   Member,
   MemberInput,
+  MemberQuery,
   MemberUpdateInput,
 } from "../libs/types/member";
 import MemberModel from "../schema/Member.model";
@@ -130,6 +132,40 @@ class MemberService {
     if (!result) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTH);
 
     return result;
+  }
+
+  public async getMembers(inquery: MemberQuery): Promise<Member[]> {
+    const matches = { memberType: MemberType.USER };
+
+    const result = await this.memberModel
+      .aggregate([
+        { $match: matches },
+        { $sort: { updatedAt: -1 } },
+        { $skip: (inquery.page - 1) * inquery.limit },
+        { $limit: inquery.limit },
+      ])
+      .exec();
+
+    return result;
+  }
+
+  public async updateMemberStatus(
+    memberId: ObjectId,
+    memberStatus: MemberStatus,
+  ): Promise<Member> {
+    const result = await this.memberModel
+      .findOneAndUpdate(
+        { _id: memberId, memberType: MemberType.USER },
+        { $set: { memberStatus } },
+        { new: true },
+      )
+      .exec();
+
+    if (!result) {
+      throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+    }
+
+    return result as Member;
   }
 
   public async getActiveMember(id: string): Promise<Member> {

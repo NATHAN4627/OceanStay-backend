@@ -11,6 +11,7 @@ import {
 } from "../libs/types/member";
 import AuthService from "../models/Auth.service";
 import MemberService from "../models/Member.service";
+import { MemberType } from "../libs/enums/member.enum";
 
 const memberController: T = {};
 

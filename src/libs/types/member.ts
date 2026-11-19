@@ -34,6 +34,11 @@ export interface MemberUpdateInput {
   newPassword?: string;
 }
 
+export interface MemberQuery {
+  page: number;
+  limit: number;
+}
+
 export interface LoginInput {
   memberPhone: string;
   memberPassword: string;

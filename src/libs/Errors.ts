@@ -26,6 +26,8 @@ export enum Message {
   TOKEN_CREATION_FAILED = "Token creation error!",
   WRONG_PSWD_NICK = "WRONG_PSWD_NICK!",
   WRONG_CURRENT_PSWD = "Current password wong!",
+  ADMIN_ONLY = "Admin access is required!",
+  INVALID_MEMBER_STATUS = "INVALID_MEMBER_STATUS",
 }
 
 class Errors extends Error {
