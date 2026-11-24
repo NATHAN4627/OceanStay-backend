@@ -106,6 +106,12 @@ Bu bosqichda mavjud `express`, `mongoose`, `jsonwebtoken` va `cookie-parser` ish
 - 10 ta qat’iy limit bo‘lishi uchun server `limit = 10` ishlatishi kerak. Hozir `page` va `limit`ni yuborish talab etiladi. Standart `page = 1` va sonli parametr validatsiyasi qo‘shilsa, noto‘g‘ri sonlardan keladigan xatolar bartaraf bo‘ladi.
 - Status endpointi uchun yaroqli ID va faqat `ACTIVE` yoki `BLOCK` qiymatlarini serverda tekshirish kerak. Hozirgi filter rolni tekshiradi. Status bo‘yicha tekshiruv alohida qo‘shiladi.
 
-## 6. Keyingi qadam — Room modeli
+## 6. Keyingi qadam — xona yaratish
 
-Avval `RoomType` (`STANDARD`, `FAMILY`, `LUXURY`), `Room` tipi va `Room.model.ts` schemangizni yozamiz. Birinchi maydonlar `roomNumber` (unique), `name`, `type`, `maxGuests`, `nightlyRate` va `images`. Model tayyor bo‘lgach, admin uchun `POST /admin/rooms` orqali xona yaratamiz. Keyin katalog, yangilash, arxivlash va `uploads/rooms`ga rasm yuklash bosqichlari keladi.
+Xona turi karavot soniga bog‘liq. Bir, ikki yoki to‘rtta double karavot uchun `ONE_DOUBLE`, `TWO_DOUBLE` va `FOUR_DOUBLE` ishlatiladi. Xona statusi `AVAILABLE` yoki `SOLD`.
+
+1. Admin `POST /admin/rooms` orqali xona yaratadi. Xona rasmlari `uploads/rooms`ga yoziladi va yo‘llari `images` massivida saqlanadi.
+2. Admin `GET /admin/rooms` orqali ikkala statusdagi xonalarni ko‘radi.
+3. `GET /rooms/:roomId` orqali foydalanuvchi va admin xona detail’i hamda rasm yo‘llarini oladi.
+
+Birinchi API’ni qo‘lda yozish qadamlari [07. Xona yaratish](07-room-yaratish.md) faylida.

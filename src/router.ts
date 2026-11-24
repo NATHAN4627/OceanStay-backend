@@ -39,4 +39,8 @@ router.post(
   adminController.updateMemberStatus,
 );
 
+/** ROOM */
+
+
+
 export default router;
