@@ -19,12 +19,13 @@ Admin bilan `POST /login` qiling. O‘sha cookie bilan **`POST /admin/room`** va
 | `roomNumber` | Text | `201`. Har xona uchun unique. |
 | `roomName` | Text | `Ocean View Room`. Majburiy. |
 | `roomMaxGuests` | Text | `4`. Majburiy, kamida 2. |
+| `roomPrice` | Text | `150000`. Majburiy, 0 yoki undan katta son. |
 | `roomDesc` | Text | `Dengiz tomonga qaragan xona`. Ixtiyoriy. |
 | `roomType` | Text | `TWO_DOUBLE`. |
 | `roomStatus` | Text | `AVAILABLE` yoki `SOLD`. |
 | `roomImages` | File | Har bir fayl uchun aynan `roomImages` key’ini ishlating. |
 
-Oldingi variantdagi `name` va `maxGuests` kalitlari joriy schema’dagi majburiy maydonlarni to‘ldirmaydi. Joriy nomlar `roomName` va `roomMaxGuests`. Mongoose multipartdagi `"4"`ni son sifatida saqlaydi.
+Joriy maydon nomlari `roomName`, `roomMaxGuests` va `roomPrice`. Mongoose multipartdagi `"4"` va `"150000"` qiymatlarini songa aylantirib saqlaydi. `roomPrice` turi `RoomInput`da `number`, schema’da `Number`. Bu maydon qo‘shilishidan oldin yaratilgan xonalarga narxni alohida kiritish kerak bo‘lishi mumkin.
 
 ## 2. `roomType`ni schema’da saqlash
 
@@ -57,16 +58,16 @@ if (Array.isArray(req.files)) {
   input.roomImages = req.files.map((file) => `uploads/room/${file.filename}`);
 }
 
-const result = await roomService.createRoom(req.body);
+const result = await roomService.createRoom(input);
 ```
 
-`input` shu yerda `req.body` obyektiga ishora qiladi. Shuning uchun joriy `createRoom(req.body)` chaqiruvi qo‘shilgan rasm yo‘llarini ham oladi. Yuklangan rasmlar soni bilan javobdagi `roomImages.length` bir xil bo‘ladi.
+`input` body’dagi `roomPrice` va qo‘shilgan rasm yo‘llarini service’ga olib o‘tadi. Yuklangan rasmlar soni bilan javobdagi `roomImages.length` bir xil bo‘ladi.
 
 ## 4. Create’ni yakuniy tekshirish
 
 - `404 Cannot POST /admin/rooms` kelsa, joriy URL `/admin/room` ekanini tekshiring.
 - `400 Create is failed!` kelsa, terminalda `Error: model:createRoom`dan keyingi asl xabarga qarang. `ValidationError`da xato maydon nomi ko‘rinadi. `E11000` bo‘lsa, ishlatilmagan `roomNumber` tanlang.
 - `Unexpected field` kelsa, Postman’dagi fayl key’i va routerdagi `.array()` argumenti ikkalasi ham `roomImages` ekanini tekshiring.
-- `201` javobida `roomName`, `roomType`, `roomMaxGuests`, `roomStatus` va `roomImages`ni tekshiring.
+- `201` javobida `roomName`, `roomType`, `roomMaxGuests`, `roomPrice`, `roomStatus` va `roomImages`ni tekshiring. Narx yuborilmasa yoki manfiy bo‘lsa, create `400` qaytaradi.
 
-Paketlar avvalgidek `express`, `mongoose`, `multer`, `@types/multer` va `uuid`. Keyingi bosqich [08. Admin uchun xonalar ro‘yxati](08-admin-xonalar-royxati.md).
+Paketlar avvalgidek `express`, `mongoose`, `multer`, `@types/multer` va `uuid`. Keyingi bosqich [08. Xonalar ro‘yxati](08-admin-xonalar-royxati.md).

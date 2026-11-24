@@ -7,6 +7,7 @@ export interface RoomInput {
   roomDesc?: string;
   roomType: RoomType;
   roomMaxGuests: number;
+  roomPrice: number;
   roomStatus?: RoomStatus;
   roomImages: string[];
 }
@@ -17,4 +18,12 @@ export interface Room extends RoomInput {
   roomStatus: RoomStatus;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface RoomInquery {
+  order: string;
+  page: number;
+  limit: number;
+  roomType?: RoomType;
+  search?: string;
 }

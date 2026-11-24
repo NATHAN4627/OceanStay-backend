@@ -50,4 +50,6 @@ router.post(
   roomController.createRoom,
 );
 
+router.get("/room/all", roomController.getRooms);
+
 export default router;

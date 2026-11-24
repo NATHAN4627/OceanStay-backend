@@ -18,6 +18,10 @@ const roomSchema = new Schema<Room>(
       required: true,
       min: 2,
     },
+    roomPrice: {
+      type: Number,
+      required: true,
+    },
     roomDesc: {
       type: String,
     },

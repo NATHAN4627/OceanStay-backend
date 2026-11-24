@@ -111,7 +111,7 @@ Bu bosqichda mavjud `express`, `mongoose`, `jsonwebtoken` va `cookie-parser` ish
 Xona turi karavot soniga bog‘liq. Bir, ikki yoki to‘rtta double karavot uchun `ONE_DOUBLE`, `TWO_DOUBLE` va `FOUR_DOUBLE` ishlatiladi. Xona statusi `AVAILABLE` yoki `SOLD`.
 
 1. Admin `POST /admin/room` orqali xona yaratadi. Hozirgi uploader rasmlarni `uploads/room`ga yozadi. Yo‘llar `roomImages` massivida saqlanadi.
-2. Admin `GET /admin/rooms` orqali ikkala statusdagi xonalarni ko‘radi.
-3. `GET /rooms/:roomId` orqali foydalanuvchi va admin xona detail’i hamda rasm yo‘llarini oladi.
+2. `GET /room/all` orqali hamma ikkala statusdagi xonalar ro‘yxatini ko‘radi.
+3. Rejadagi `GET /room/:roomId` orqali hamma xona tafsilotlari va rasm yo‘llarini oladi.
 
 Birinchi API’ni qo‘lda yozish qadamlari [07. Xona yaratish](07-room-yaratish.md) faylida.
