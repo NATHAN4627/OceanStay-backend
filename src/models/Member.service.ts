@@ -38,19 +38,22 @@ class MemberService {
 
   public async login(input: LoginInput): Promise<Member> {
     const member = await this.memberModel
-      .findOne(
-        {
-          memberPhone: input.memberPhone,
-          memberStatus: { $ne: MemberStatus.DELETE },
-        },
-        { memberPassword: 1, memberStatus: 1 },
-      )
+      .findOne({
+        memberPhone: input.memberPhone,
+        memberStatus: { $ne: MemberStatus.DELETE },
+      })
+      .select("+memberPassword")
+      .lean()
       .exec();
 
     if (!member || !member.memberPassword) {
       throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PSWD_PHONE);
     } else if (member.memberStatus === MemberStatus.BLOCK) {
       throw new Errors(HttpCode.FORBIDDEN, Message.BLOCKED_USER);
+    }
+
+    if (!member || member.memberStatus !== MemberStatus.ACTIVE) {
+      throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTH);
     }
 
     const isMatch = await bcrypt.compare(
@@ -61,7 +64,8 @@ class MemberService {
       throw new Errors(HttpCode.UNAUTHORIZED, Message.WRONG_PSWD_PHONE);
     }
 
-    return this.getActiveMember(member._id.toString());
+    const { memberPassword, ...profile } = member;
+    return profile;
   }
 
   public async updateMember(input: MemberUpdateInput): Promise<Member> {

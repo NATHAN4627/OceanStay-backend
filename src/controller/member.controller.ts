@@ -74,8 +74,8 @@ memberController.getMember = (req: ExtendedRequest, res: Response) => {
 
 memberController.updateMember = async (req: ExtendedRequest, res: Response) => {
   const file = req.file;
-  console.log("file:",file);
-  
+  console.log("file:", file);
+
   try {
     const { memberNick, memberAddress, currentPassword, newPassword } =
       req.body ?? {};
@@ -114,6 +114,7 @@ memberController.verifyAuth = async (
     }
 
     const memberId = await authService.verifyAuth(token);
+    // user allaqacon login bolib, lekn admin block qilgan bolsa api-larni ishlata olmasligi uchun kerak
     req.member = await memberService.getActiveMember(memberId);
 
     if (!req.member) throw new Errors(HttpCode.UNAUTHORIZED, Message.NOT_AUTH);
