@@ -11,11 +11,6 @@ const imageMimeExtensions = new Map([
   [".png", "image/png"],
 ]);
 
-const imageSignatures = new Map([
-  ["image/jpeg", Buffer.from("ffd8ff", "hex")],
-  ["image/png", Buffer.from("89504e470d0a1a0a", "hex")],
-]);
-
 function getTargetImageStorage(address: string) {
   const directory = path.resolve("uploads", address);
 
@@ -33,7 +28,6 @@ function getTargetImageStorage(address: string) {
 const makeUploader = (address: string) => {
   return multer({
     storage: getTargetImageStorage(address),
-    limits: { files: 1, fileSize: 2 * 1024 * 1024 },
     fileFilter(_req, file, cb) {
       const extension = path.extname(file.originalname).toLowerCase();
       if (imageMimeExtensions.get(extension) !== file.mimetype) {

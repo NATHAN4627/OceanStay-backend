@@ -2,6 +2,7 @@ import express from "express";
 import memberController from "./controller/member.controller";
 import uploader from "./libs/uploads";
 import adminController from "./controller/admin.controller";
+import roomController from "./controller/room.controller";
 
 const router = express.Router();
 
@@ -41,6 +42,12 @@ router.post(
 
 /** ROOM */
 
-
+router.post(
+  "/admin/room",
+  memberController.verifyAuth,
+  adminController.verifyAdmin,
+  uploader("room").array("roomImages", 4),
+  roomController.createRoom,
+);
 
 export default router;

@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { Room } from "../libs/types/room";
-import { RoomStatus } from "../libs/enums/room.enum";
+import { RoomStatus, RoomType } from "../libs/enums/room.enum";
 
 const roomSchema = new Schema<Room>(
   {
@@ -26,6 +26,11 @@ const roomSchema = new Schema<Room>(
       required: true,
       enum: RoomStatus,
       default: RoomStatus.AVAILABLE,
+    },
+    roomType: {
+      type: String,
+      required: true,
+      enum: RoomType,
     },
     roomImages: {
       type: [String],
