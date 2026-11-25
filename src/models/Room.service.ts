@@ -107,6 +107,21 @@ class RoomService {
       throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
     }
   }
+
+  public async deleteRoom(id: string): Promise<boolean> {
+    try {
+      const roomId = shapeIntoMongooseObjectId(id);
+
+      const result = await this.roomModel.findByIdAndDelete(roomId).exec();
+
+      if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+      return true;
+    } catch (err) {
+      console.log("Error: model:getRoom", err);
+      throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    }
+  }
 }
 
 export default RoomService;

@@ -83,4 +83,18 @@ roomController.updateRoom = async (req: Request, res: Response) => {
   }
 };
 
+roomController.deleteRoom = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await roomService.deleteRoom(id as string);
+
+    res.status(HttpCode.OK).json(result);
+  } catch (err) {
+    if (err instanceof Errors)
+      res.status(err.code).json({ code: err.code, message: err.message });
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
 export default roomController;

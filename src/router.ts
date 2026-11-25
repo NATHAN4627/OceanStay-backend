@@ -61,4 +61,11 @@ router.post(
   roomController.updateRoom,
 );
 
+router.post(
+  "/admin/room/delete/:id",
+  memberController.verifyAuth,
+  adminController.verifyAdmin,
+  roomController.deleteRoom,
+);
+
 export default router;
