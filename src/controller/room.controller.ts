@@ -68,4 +68,19 @@ roomController.getRoom = async (req: Request, res: Response) => {
   }
 };
 
+roomController.updateRoom = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const input = req.body ?? {};
+
+    const result = await roomService.updateRoom(id as string, input);
+
+    res.status(HttpCode.OK).json(result);
+  } catch (err) {
+    if (err instanceof Errors)
+      res.status(err.code).json({ code: err.code, message: err.message });
+    else res.status(Errors.standard.code).json(Errors.standard);
+  }
+};
+
 export default roomController;

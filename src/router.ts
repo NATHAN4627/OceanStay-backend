@@ -54,4 +54,11 @@ router.get("/room/all", roomController.getRooms);
 
 router.get("/room/:id", roomController.getRoom);
 
+router.post(
+  "/admin/room/update/:id",
+  memberController.verifyAuth,
+  adminController.verifyAdmin,
+  roomController.updateRoom,
+);
+
 export default router;

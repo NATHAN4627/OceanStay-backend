@@ -1,7 +1,12 @@
 import { ObjectId } from "mongoose";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
-import { Room, RoomInput, RoomInquery } from "../libs/types/room";
+import {
+  Room,
+  RoomInput,
+  RoomInquery,
+  RoomUpdateInput,
+} from "../libs/types/room";
 import RoomModel from "../schema/Room.model";
 import { shapeIntoMongooseObjectId } from "../libs/config";
 
@@ -68,6 +73,38 @@ class RoomService {
     } catch (err) {
       console.log("Error: model:getRoom", err);
       throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    }
+  }
+
+  public async updateRoom(id: string, input: RoomUpdateInput): Promise<Room> {
+    try {
+      const roomId = shapeIntoMongooseObjectId(id);
+
+      const result = await this.roomModel
+        .findByIdAndUpdate(
+          roomId,
+          {
+            $set: {
+              roomNumber: input.roomNumber,
+              roomName: input.roomName,
+              roomDesc: input.roomDesc,
+              roomType: input.roomType,
+              roomMaxGuests: input.roomMaxGuests,
+              roomPrice: input.roomPrice,
+              roomStatus: input.roomStatus,
+            },
+          },
+          { new: true },
+        )
+        .exec();
+
+      if (!result)
+        throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
+
+      return result;
+    } catch (err) {
+      console.log("Error: model:updateRoom", err);
+      throw new Errors(HttpCode.NOT_MODIFIED, Message.UPDATE_FAILED);
     }
   }
 }

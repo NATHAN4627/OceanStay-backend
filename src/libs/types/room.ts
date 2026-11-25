@@ -27,3 +27,13 @@ export interface RoomInquery {
   roomType?: RoomType;
   search?: string;
 }
+
+export interface RoomUpdateInput {
+  roomNumber?: string;
+  roomName?: string;
+  roomDesc?: string;
+  roomType?: RoomType;
+  roomMaxGuests?: number;
+  roomPrice?: number;
+  roomStatus?: RoomStatus;
+}
