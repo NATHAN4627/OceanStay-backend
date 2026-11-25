@@ -9,7 +9,7 @@ export interface RoomInput {
   roomMaxGuests: number;
   roomPrice: number;
   roomStatus?: RoomStatus;
-  roomImages: string[];
+  roomImages?: string[];
 }
 
 //qaytadan yozmaslik uchun extends qilindi

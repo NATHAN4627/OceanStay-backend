@@ -1,66 +1,44 @@
 # 09. Xona tafsilotlari
 
-`GET /room/:roomId` xona _id’si bo‘yicha bitta hujjatni qaytaradi. Mehmon ham so‘rov yubora oladi. `AVAILABLE` va `SOLD` xonalar detail orqali ko‘rinadi. Javobdagi `roomImages` saqlangan rasm yo‘llarini beradi.
-
-## 1. Service
-
-`src/libs/Errors.ts`da `Message` enum’iga `INVALID_ROOM_ID = "Invalid room ID.",` qo‘shing. `src/models/Room.service.ts`ga `import { isObjectIdOrHexString } from "mongoose";` qo‘shib, klass ichiga metodni yozing.
+Joriy `GET /room/:id` bitta xona hujjatini qaytaradi. Mehmon ham so‘rov yubora oladi. `AVAILABLE` va `SOLD` xonalar detail orqali ko‘rinadi. Javobga xona narxi va `roomImages` yo‘llari ham kiradi.
 
 ```ts
-  public async getRoom(roomId: unknown): Promise<Room> {
-    if (typeof roomId !== "string" || !isObjectIdOrHexString(roomId)) {
+router.get("/room/all", roomController.getRooms);
+router.get("/room/:id", roomController.getRoom);
+```
+
+`/room/all` birinchi turadi, shunda `all` xona ID’si sifatida o‘qilmaydi. Controller `req.params.id`ni service’ga uzatadi. Service `shapeIntoMongooseObjectId(id)` bilan ID’ni aylantirib, `findById()` orqali bitta xona qidiradi. Xona topilsa `200` va hujjat qaytadi.
+
+## 1. ID va xato javoblari
+
+Joriy `catch` barcha xatolarni `404`ga aylantiradi. Shu sababli format xatosi va MongoDB xatosi ham xona topilmagandek ko‘rinadi. Aniqlashtirish uchun `src/libs/Errors.ts`dagi `Message` enum’iga `INVALID_ROOM_ID = "Invalid room ID.",` qo‘shing. `src/models/Room.service.ts`da `isObjectIdOrHexString`ni `mongoose`dan import qilib, faqat `getRoom` metodini almashtiring.
+
+```ts
+  public async getRoom(id: unknown): Promise<Room> {
+    if (typeof id !== "string" || !isObjectIdOrHexString(id)) {
       throw new Errors(HttpCode.BAD_REQUEST, Message.INVALID_ROOM_ID);
     }
 
-    const result = await this.roomModel.findById(roomId).lean().exec();
+    const roomId = shapeIntoMongooseObjectId(id);
+    const result = await this.roomModel.findById(roomId).exec();
 
-    if (!result) {
-      throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
-    }
+    if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
 
     return result;
   }
 ```
 
-URL’dan ID string keladi. Yaroqli ID tekshiruvidan so‘ng `findById()` uni schema bo‘yicha MongoDB ID’siga aylantirib qidiradi. Postman’da ro‘yxat javobidagi `_id`ni nusxalang. `roomNumber` xonaning ko‘rinadigan raqami.
+Controllerda `await roomService.getRoom(id)` yozing. `as string` olib tashlanadi, chunki service URL qiymatini o‘zi tekshiradi. Controllerning mavjud `catch` qismi yaroqsiz ID’ga `400`, topilmagan xonaga `404`, kutilmagan xatoga `500` beradi.
 
-## 2. Controller
-
-`src/controller/room.controller.ts`da `export default roomController`dan oldin yozing.
-
-```ts
-roomController.getRoom = async (req: Request, res: Response) => {
-  try {
-    const result = await roomService.getRoom(req.params.roomId);
-    res.status(HttpCode.OK).json(result);
-  } catch (err) {
-    if (err instanceof Errors) {
-      res.status(err.code).json({ code: err.code, message: err.message });
-    } else {
-      res.status(Errors.standard.code).json(Errors.standard);
-    }
-  }
-};
-```
-
-## 3. Router
-
-`src/router.ts`da mavjud ro‘yxat qatoridan keyin `getRoom`ni ulang.
-
-```ts
-router.get("/room/all", roomController.getRooms);
-router.get("/room/:roomId", roomController.getRoom);
-```
-
-`/room/all` birinchi turadi. Express shu tartibda mos marshrutni tanlaydi. Ikkalasi ham cookie talab qilmaydi.
-
-## 4. Postman
+## 2. Postman
 
 1. Cookie yubormasdan `GET /room/all?page=1&limit=10&order=createdAt`dan bitta `_id` oling.
-2. Shu ID bilan `GET /room/:roomId` yuboring. `200` bilan xona nomi, turi, narxi, statusi va `roomImages` qaytadi.
-3. `GET /room/not-an-id` `400` qaytaradi. Bazada mavjud bo‘lmagan yaroqli ID `404` qaytaradi.
+2. Shu ID bilan `GET /room/:id` yuboring. `200` va xona hujjatini kuting.
+3. Yuqoridagi ID tekshiruvi qo‘shilgach, `GET /room/not-an-id` `400` beradi. Bazada mavjud bo‘lmagan yaroqli ID `404` beradi.
 
-Brauzerda rasmni ham ochish uchun `src/app.ts`da mavjud `path` importidan foydalanib, `app.use("/", router)`dan oldin xona rasmlari papkasini ulang.
+## 3. Rasmni brauzerda ochish
+
+`roomImages` hozir fayl yo‘llarini qaytaradi. `app.ts`dagi static route izohga olingan bo‘lgani uchun bu yo‘llarni brauzer orqali olish hali ulanmagan. Xona rasmi kerak bo‘lganda `src/app.ts`da mavjud `path` importidan foydalanib, `app.use("/", router)`dan oldin qo‘shing.
 
 ```ts
 app.use(
@@ -73,4 +51,4 @@ app.use(
 );
 ```
 
-Shunda `roomImages`dagi `uploads/room/...` yo‘lini API host’i bilan ochish mumkin. Bu bosqichda mavjud `express` va `mongoose` ishlatiladi.
+Shunda `roomImages`dagi `uploads/room/...` yo‘lini API host’i bilan ochish mumkin. Bu bosqichda mavjud `express` va `mongoose` ishlatiladi. Keyingi API [10. Admin orqali xona ma’lumotlarini yangilash](10-room-yangilash.md).

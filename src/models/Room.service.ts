@@ -1,7 +1,9 @@
+import { ObjectId } from "mongoose";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import { T } from "../libs/types/common";
 import { Room, RoomInput, RoomInquery } from "../libs/types/room";
 import RoomModel from "../schema/Room.model";
+import { shapeIntoMongooseObjectId } from "../libs/config";
 
 class RoomService {
   private readonly roomModel;
@@ -50,7 +52,22 @@ class RoomService {
       return result;
     } catch (err) {
       console.log("Error: model:getRooms", err);
-      throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
+      throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+    }
+  }
+
+  public async getRoom(id: string): Promise<Room> {
+    try {
+      const roomId = shapeIntoMongooseObjectId(id);
+
+      const result = await this.roomModel.findById(roomId).exec();
+
+      if (!result) throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
+
+      return result;
+    } catch (err) {
+      console.log("Error: model:getRoom", err);
+      throw new Errors(HttpCode.NOT_FOUND, Message.NO_DATA_FOUND);
     }
   }
 }
