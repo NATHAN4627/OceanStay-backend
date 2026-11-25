@@ -43,7 +43,7 @@ router.post(
 /** ROOM */
 
 router.post(
-  "/admin/room",
+  "/admin/room/create",
   memberController.verifyAuth,
   adminController.verifyAdmin,
   uploader("room").array("roomImages", 4),

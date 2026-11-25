@@ -1,6 +1,6 @@
 # 07. Xona yaratish
 
-Bu bosqich `POST /admin/room` orqali xona yaratish uchun. Router sessiya va admin rolini tekshiradi, keyin Multer bir xil `roomImages` key’i ostida yuborilgan rasmlarni oladi. Joriy router har so‘rovda to‘rttagacha rasm qabul qiladi.
+Bu bosqich `POST /admin/room/create` orqali xona yaratish uchun. Router sessiya va admin rolini tekshiradi, keyin Multer bir xil `roomImages` key’i ostida yuborilgan rasmlarni oladi. Joriy router har so‘rovda to‘rttagacha rasm qabul qiladi.
 
 | Xona turi | API qiymati |
 | --- | --- |
@@ -12,14 +12,14 @@ Xona statusi `AVAILABLE` yoki `SOLD`. `roomStatus` yuborilmasa, schema `AVAILABL
 
 ## 1. Hozirgi Postman so‘rovi
 
-Admin bilan `POST /login` qiling. O‘sha cookie bilan **`POST /admin/room`** va **Body → form-data**ni tanlang. Routerda `room` yakka shaklda yozilgan.
+Admin bilan `POST /login` qiling. O‘sha cookie bilan **`POST /admin/room/create`** va **Body → form-data**ni tanlang.
 
 | Key | Tur | Misol |
 | --- | --- | --- |
 | `roomNumber` | Text | `201`. Har xona uchun unique. |
 | `roomName` | Text | `Ocean View Room`. Majburiy. |
 | `roomMaxGuests` | Text | `4`. Majburiy, kamida 2. |
-| `roomPrice` | Text | `150000`. Majburiy, 0 yoki undan katta son. |
+| `roomPrice` | Text | `150000`. Majburiy son. |
 | `roomDesc` | Text | `Dengiz tomonga qaragan xona`. Ixtiyoriy. |
 | `roomType` | Text | `TWO_DOUBLE`. |
 | `roomStatus` | Text | `AVAILABLE` yoki `SOLD`. |
@@ -65,9 +65,9 @@ const result = await roomService.createRoom(input);
 
 ## 4. Create’ni yakuniy tekshirish
 
-- `404 Cannot POST /admin/rooms` kelsa, joriy URL `/admin/room` ekanini tekshiring.
+- `404 Cannot POST /admin/room` kelsa, URL’ga `/create` qo‘shing.
 - `400 Create is failed!` kelsa, terminalda `Error: model:createRoom`dan keyingi asl xabarga qarang. `ValidationError`da xato maydon nomi ko‘rinadi. `E11000` bo‘lsa, ishlatilmagan `roomNumber` tanlang.
 - `Unexpected field` kelsa, Postman’dagi fayl key’i va routerdagi `.array()` argumenti ikkalasi ham `roomImages` ekanini tekshiring.
-- `201` javobida `roomName`, `roomType`, `roomMaxGuests`, `roomPrice`, `roomStatus` va `roomImages`ni tekshiring. Narx yuborilmasa yoki manfiy bo‘lsa, create `400` qaytaradi.
+- `201` javobida `roomName`, `roomType`, `roomMaxGuests`, `roomPrice`, `roomStatus` va `roomImages`ni tekshiring. Narx yuborilmasa yoki songa aylantirib bo‘lmasa, create `400` qaytaradi.
 
-Paketlar avvalgidek `express`, `mongoose`, `multer`, `@types/multer` va `uuid`. Keyingi bosqich [08. Xonalar ro‘yxati](08-admin-xonalar-royxati.md).
+Paketlar avvalgidek `express`, `mongoose`, `multer`, `@types/multer` va `uuid`. Keyingi bosqich [08. Xonalar ro‘yxati](08-xonalar-royxati.md).

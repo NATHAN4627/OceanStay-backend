@@ -59,4 +59,4 @@ Joriy `catch` sababli topilmagan xona, yaroqsiz ID va kutilmagan MongoDB xatosi 
 
 Public signup’dagi joriy `create(input)` rol qiymatini modelga o‘tkazishi mumkin. Bu endpointni haqiqiy foydalanuvchilarga ochishdan oldin [04-qadamdagi signup maydonlari](04-signup-maydonlari.md) tuzatishini qo‘llang.
 
-Bu qadamda mavjud `express` va `mongoose` ishlatiladi.
+Bu qadamda mavjud `express` va `mongoose` ishlatiladi. Keyingi qadam [12. Xarid tarixi, favorites va Order modeli](12-orders-va-favorites.md).
