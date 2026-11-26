@@ -9,6 +9,7 @@ import {
 } from "../libs/types/room";
 import RoomModel from "../schema/Room.model";
 import { shapeIntoMongooseObjectId } from "../libs/config";
+import { RoomStatus } from "../libs/enums/room.enum";
 
 class RoomService {
   private readonly roomModel;
@@ -19,7 +20,10 @@ class RoomService {
 
   public async createRoom(input: RoomInput): Promise<Room> {
     try {
-      const result = await this.roomModel.create(input);
+      const result = await this.roomModel.create({
+        ...input,
+        roomStatus: RoomStatus.AVAILABLE,
+      });
 
       if (!result)
         throw new Errors(HttpCode.BAD_REQUEST, Message.CREATE_FAILED);
@@ -91,7 +95,6 @@ class RoomService {
               roomType: input.roomType,
               roomMaxGuests: input.roomMaxGuests,
               roomPrice: input.roomPrice,
-              roomStatus: input.roomStatus,
             },
           },
           { new: true },

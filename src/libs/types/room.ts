@@ -8,7 +8,6 @@ export interface RoomInput {
   roomType: RoomType;
   roomMaxGuests: number;
   roomPrice: number;
-  roomStatus?: RoomStatus;
   roomImages?: string[];
 }
 
@@ -35,5 +34,4 @@ export interface RoomUpdateInput {
   roomType?: RoomType;
   roomMaxGuests?: number;
   roomPrice?: number;
-  roomStatus?: RoomStatus;
 }

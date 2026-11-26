@@ -35,7 +35,7 @@ const orderSchema = new Schema<Order>(
     amount: {
       type: Number,
       required: true,
-      default: 0,
+      min: 0,
       validate: Number.isFinite,
     },
     orderRoomInfo: {

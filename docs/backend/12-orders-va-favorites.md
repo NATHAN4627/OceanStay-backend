@@ -9,10 +9,10 @@ Bu bosqichda bitta xona bir marta sotiladi. Demo xarid tasdiqlanganda xona `AVAI
 | Kolleksiya | Nima saqlanadi? |
 | --- | --- |
 | `rooms` | Xonaning hozirgi tafsilotlari, narxi va sotuv holati. |
-| `orders` | `memberId`, `roomId`, xarid narxi `amount`, xarid paytidagi `roomSnapshot` va sana. «Mening xaridlarim» shu kolleksiyani o‘qiydi. |
+| `orders` | `memberId`, `roomId`, xarid narxi `amount`, xarid paytidagi `orderRoomInfo` va sana. «Mening xaridlarim» shu kolleksiyani o‘qiydi. |
 | `favorites` | `memberId`, `roomId` va saqlangan sana. Har bir userning shaxsiy ro‘yxati. |
 
-`history` uchun alohida yozuv ochishga hojat yo‘q. Har bir `Order` allaqachon yakunlangan xaridni bildiradi. Xona keyin tahrirlansa yoki bazadan o‘chirilsa ham, tarix `roomSnapshot`dan xarid paytidagi nom, raqam va turni, `amount`dan o‘sha narxni ko‘rsatadi.
+`history` uchun alohida yozuv ochishga hojat yo‘q. Har bir `Order` allaqachon yakunlangan xaridni bildiradi. Xona keyin tahrirlansa yoki bazadan o‘chirilsa ham, tarix `orderRoomInfo`dan xarid paytidagi nom, raqam va turni, `amount`dan o‘sha narxni ko‘rsatadi.
 
 Favorites uchun alohida kolleksiya qulay. Bitta xona bir nechta userda saqlanishi mumkin, har bir user esa ko‘p xonani saqlashi mumkin. `{ memberId: 1, roomId: 1 }` unique indeksi bir user bitta xonani takroran saqlashining oldini oladi. Ro‘yxat xonaning joriy ma’lumotlarini ko‘rsatadi. Sotilgan xona `SOLD` bo‘lib ko‘rinadi. Bazadan o‘chirilgan xona ro‘yxatda chiqmaydi. [MongoDB unique indekslari](https://www.mongodb.com/docs/manual/core/index-unique/)
 
@@ -21,60 +21,57 @@ Favorites uchun alohida kolleksiya qulay. Bitta xona bir nechta userda saqlanish
 | Qadam | API | Vazifasi |
 | --- | --- | --- |
 | 12 | `Order` modeli | Type, schema va indekslarni tayyorlaymiz. |
-| 13 | `POST /orders/room/:roomId` | Login qilgan user uchun demo xaridni yakunlaymiz. |
+| 13 | [`POST /order/room/:id`](13-xona-xaridi.md) | Login qilgan user uchun demo xaridni yakunlaymiz. |
 | 14 | `GET /orders/my?page=1` | O‘z xaridlarini yangisidan boshlab 10 tadan qaytaramiz. |
 | 15 | `POST /favorites/add/:roomId` | Xonani saqlaymiz. Ikkinchi bosishda ham bitta yozuv qoladi. |
 | 15 | `POST /favorites/remove/:roomId` | Userning o‘z ro‘yxatidan xonani olib tashlaymiz. |
 | 16 | `GET /favorites/my?page=1` | Mavjud xonalarni oxirgi saqlanganidan boshlab 10 tadan qaytaramiz. |
 
-Xarid, history va favorites uchun egasini `verifyAuth` to‘ldirgan `req.member._id`dan olamiz. Xarid so‘rovida Postman URL orqali `roomId`ni yuboradi. Service narxni bazadagi `roomPrice`dan oladi. Narxi yozilmagan, manfiy yoki yaroqsiz eski xona xarid qilinmaydi.
+Xarid, history va favorites uchun egasini `verifyAuth` to‘ldirgan `req.member._id`dan olamiz. Xarid so‘rovida Postman URL orqali xona ID’sini yuboradi. Service narxni bazadagi `roomPrice`dan oladi.
 
-Xaridda service bitta MongoDB transaction ichida `_id` va `roomStatus: AVAILABLE` bo‘yicha xonani `SOLD` qiladi, keyin shu xona bilan `Order` yozadi. Ikkala yozuv birga tasdiqlanadi. `Order` yozilmasa, xona statusining o‘zgarishi ham bekor bo‘ladi. Parallel xaridda bitta so‘rov `201`, ikkinchisi `409` oladi. Bu API’ni sinash uchun MongoDB replica set yoki sharded cluster kerak. [Mongoose transactions](https://mongoosejs.com/docs/transactions.html), [MongoDB transaction talablari](https://www.mongodb.com/docs/manual/core/transactions-production-consideration/)
+Demo xaridda service `_id` va `roomStatus: AVAILABLE` bo‘yicha xonani `SOLD` qiladi, keyin `Order` yozadi. `AVAILABLE` sharti ikki parallel so‘rov bitta xonani yangilashiga yo‘l qo‘ymaydi. Bu variantda yozuvlar alohida bajariladi. Order yozishda xato chiqsa, xona `SOLD` bo‘lib qolishi va xarid tarixiga tushmasligi mumkin. [MongoDB yozuvlarining atomarligi](https://www.mongodb.com/docs/manual/core/write-operations-atomicity/)
 
-Admin `createRoom` va `updateRoom` orqali `roomStatus`ni ham yubora oladi. Xarid API’sini qo‘shganda yangi xonani schema `AVAILABLE` qilib ochadi va `SOLD`ga o‘tishni xarid service’i boshqaradi. Shu bilan xarid qilingan xonani admin update orqali tasodifan qayta sotuvga qo‘ymaydi. Avvaldan `SOLD` bo‘lgan xona sotuvga chiqmaydi. Xarid tarixi yangi `Order` yozuvlari bilan boshlanadi.
+Admin yangi xona yaratganda service uni `AVAILABLE` qilib ochadi. Admin update orqali status yozilmaydi. `SOLD`ga o‘tishni xarid service’i boshqaradi. Avvaldan `SOLD` bo‘lgan xona sotuvga chiqmaydi. Xarid tarixi yangi `Order` yozuvlari bilan boshlanadi.
 
 13-qadamda Postman orqali yangi xona xaridi (`201`), qayta xarid (`409`), topilmagan xona (`404`), yaroqsiz ID (`400`) va sessiyasiz so‘rovni (`401`) tekshiramiz. 14-qadamda ikkinchi user birinchi userning xaridlarini ko‘rmasligini va admin xonani o‘chirgandan keyin ham xarid tarixda chiqishini sinaymiz.
 
 ## 1. `src/libs/types/order.ts`
 
 ```ts
-import type { Types } from "mongoose";
-import type { RoomType } from "../enums/room.enum";
+import { ObjectId } from "mongoose";
+import { RoomType } from "../enums/room.enum";
 
-export interface OrderRoomSnapshot {
+export interface OrderRoomInfo {
   roomNumber: string;
   roomName: string;
   roomType: RoomType;
 }
 
 export interface Order {
-  _id: Types.ObjectId;
-  memberId: Types.ObjectId;
-  roomId: Types.ObjectId;
+  _id: ObjectId;
+  memberId: ObjectId;
+  roomId: ObjectId;
   amount: number;
-  roomSnapshot: OrderRoomSnapshot;
+  orderRoomInfo: OrderRoomInfo;
   createdAt: Date;
   updatedAt: Date;
 }
 ```
 
-`OrderRoomSnapshot` xarid paytida `Room`dan olinadigan uchta qiymatni ifodalaydi. `roomId` asl xonaning identifikatori, `memberId` xaridorniki. `Types.ObjectId` bu MongoDB hujjatidagi ID’ning TypeScript turi.
+`OrderRoomInfo` xarid paytida `Room`dan olinadigan uchta qiymatni ifodalaydi. `roomId` asl xonaning identifikatori, `memberId` xaridorniki. Bu type joriy `Member` va `Room` fayllaridagi `ObjectId` yozilishiga mos.
 
 ## 2. `src/schema/Order.model.ts`
 
 ```ts
 import mongoose, { Schema } from "mongoose";
 import { RoomType } from "../libs/enums/room.enum";
-import type { Order, OrderRoomSnapshot } from "../libs/types/order";
+import { Order, OrderRoomInfo } from "../libs/types/order";
 
-const roomSnapshotSchema = new Schema<OrderRoomSnapshot>(
-  {
-    roomNumber: { type: String, required: true },
-    roomName: { type: String, required: true },
-    roomType: { type: String, enum: RoomType, required: true },
-  },
-  { _id: false },
-);
+const orderRoomInfo = new Schema<OrderRoomInfo>({
+  roomNumber: { type: String, required: true },
+  roomName: { type: String, required: true },
+  roomType: { type: String, enum: RoomType, required: true },
+});
 
 const orderSchema = new Schema<Order>(
   {
@@ -86,7 +83,7 @@ const orderSchema = new Schema<Order>(
       unique: true,
     },
     amount: { type: Number, required: true, min: 0, validate: Number.isFinite },
-    roomSnapshot: { type: roomSnapshotSchema, required: true },
+    orderRoomInfo: { type: orderRoomInfo, required: true },
   },
   { timestamps: true },
 );
@@ -97,7 +94,8 @@ export default mongoose.model("Order", orderSchema);
 ```
 
 - `ref: "Member"` va `ref: "Room"` ID’lar qaysi modellarga tegishli ekanini belgilaydi.
-- `roomSnapshot` shu order ichida saqlanadi. `{ _id: false }` unga alohida ID berilishini o‘chiradi.
+- `orderRoomInfo` shu order ichidagi subdocument sifatida saqlanadi.
+- `amount` majburiy va `min: 0`. Har bir orderga bazadagi xona narxini yozamiz.
 - `roomId`dagi `unique: true` bir xona uchun ko‘pi bilan bitta order yozilishini bazada kafolatlaydigan indeksni belgilaydi. Xarid API’sini sinashdan oldin indeks bazada yaratilganini tekshiramiz. [MongoDB unique indekslari](https://www.mongodb.com/docs/manual/core/index-unique/)
 - `timestamps: true` `createdAt` va `updatedAt`ni avtomatik qo‘shadi. Oxirgi indeks userning xaridlarini yangi sanadan eski sanaga saralashga mos. Bir xil sanada `_id` tartibni barqaror qiladi.
 
@@ -109,4 +107,4 @@ Ikki faylni yozganingizdan keyin TypeScript’ni tekshiring.
 npx tsc --noEmit
 ```
 
-Bu qadamda mavjud `mongoose` va TypeScript yetarli. Birinchi Postman so‘rovini keyingi qadamda `Order.service.ts`, controller va `POST /orders/room/:roomId` router’ini yozgandan keyin yuboramiz.
+Bu qadamda mavjud `mongoose` va TypeScript yetarli. Keyingi qadam [13. Xona xaridi](13-xona-xaridi.md).

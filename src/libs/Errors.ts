@@ -28,6 +28,10 @@ export enum Message {
   WRONG_CURRENT_PSWD = "Current password wong!",
   ADMIN_ONLY = "Admin access is required!",
   INVALID_MEMBER_STATUS = "INVALID_MEMBER_STATUS",
+  INVALID_ROOM_ID = "Invalid room ID.",
+  ROOM_NOT_AVAILABLE = "This room is no longer available.",
+  INVALID_ROOM_PRICE = "This room does not have a valid price.",
+  USER_ONLY = "A user account is required.",
 }
 
 class Errors extends Error {

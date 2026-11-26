@@ -3,6 +3,7 @@ import memberController from "./controller/member.controller";
 import uploader from "./libs/uploads";
 import adminController from "./controller/admin.controller";
 import roomController from "./controller/room.controller";
+import orderController from "./controller/order.controller";
 
 const router = express.Router();
 
@@ -66,6 +67,14 @@ router.post(
   memberController.verifyAuth,
   adminController.verifyAdmin,
   roomController.deleteRoom,
+);
+
+/** ORDER */
+
+router.post(
+  "/order/room/:id",
+  memberController.verifyAuth,
+  orderController.buyRoom,
 );
 
 export default router;
