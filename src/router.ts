@@ -77,4 +77,6 @@ router.post(
   orderController.buyRoom,
 );
 
+router.get("/orders", memberController.verifyAuth, orderController.getOrders);
+
 export default router;

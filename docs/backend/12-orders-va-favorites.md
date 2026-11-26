@@ -1,6 +1,6 @@
 # 12. Xona xaridi, xarid tarixi va favorites
 
-Hozir `GET /room/all` xonalar ro‘yxatini, `GET /room/:id` esa xona tafsilotlarini beradi. Mehmon ham shu ikki API’ni ishlata oladi. `SOLD` xonaning tafsilotlari ochiladi, xarid esa faqat `AVAILABLE` xonalar uchun ishlaydi. Yangi shaxsiy API’larda `verifyAuth` orqali faol sessiyani, undan keyin `USER` rolini tekshiramiz.
+Hozir `GET /room/all` xonalar ro‘yxatini, `GET /room/:id` esa xona tafsilotlarini beradi. Mehmon ham shu ikki API’ni ishlata oladi. `SOLD` xonaning tafsilotlari ochiladi, xarid esa faqat `AVAILABLE` xonalar uchun ishlaydi. Xarid va xarid tarixida `verifyAuth` faol sessiyani tekshiradi.
 
 Bu bosqichda bitta xona bir marta sotiladi. Demo xarid tasdiqlanganda xona `AVAILABLE`dan `SOLD`ga o‘tadi. Arxitektura hujjatidagi sanali hotel bronida xaridor xonani ma’lum kunlarga band qiladi. Agar keyin sanali bronga o‘tsak, mavjudlikni `checkIn` va `checkOut` orasidagi kunlar bo‘yicha hisoblaymiz.
 
@@ -22,7 +22,7 @@ Favorites uchun alohida kolleksiya qulay. Bitta xona bir nechta userda saqlanish
 | --- | --- | --- |
 | 12 | `Order` modeli | Type, schema va indekslarni tayyorlaymiz. |
 | 13 | [`POST /order/room/:id`](13-xona-xaridi.md) | Login qilgan user uchun demo xaridni yakunlaymiz. |
-| 14 | `GET /orders/my?page=1` | O‘z xaridlarini yangisidan boshlab 10 tadan qaytaramiz. |
+| 14 | [`GET /orders`](14-xarid-tarixi.md) | O‘zining barcha xaridlarini yangisidan boshlab qaytaramiz. |
 | 15 | `POST /favorites/add/:roomId` | Xonani saqlaymiz. Ikkinchi bosishda ham bitta yozuv qoladi. |
 | 15 | `POST /favorites/remove/:roomId` | Userning o‘z ro‘yxatidan xonani olib tashlaymiz. |
 | 16 | `GET /favorites/my?page=1` | Mavjud xonalarni oxirgi saqlanganidan boshlab 10 tadan qaytaramiz. |
@@ -33,7 +33,7 @@ Demo xaridda service `_id` va `roomStatus: AVAILABLE` bo‘yicha xonani `SOLD` q
 
 Admin yangi xona yaratganda service uni `AVAILABLE` qilib ochadi. Admin update orqali status yozilmaydi. `SOLD`ga o‘tishni xarid service’i boshqaradi. Avvaldan `SOLD` bo‘lgan xona sotuvga chiqmaydi. Xarid tarixi yangi `Order` yozuvlari bilan boshlanadi.
 
-13-qadamda Postman orqali yangi xona xaridi (`201`), qayta xarid (`409`), topilmagan xona (`404`), yaroqsiz ID (`400`) va sessiyasiz so‘rovni (`401`) tekshiramiz. 14-qadamda ikkinchi user birinchi userning xaridlarini ko‘rmasligini va admin xonani o‘chirgandan keyin ham xarid tarixda chiqishini sinaymiz.
+13-qadamda Postman orqali yangi xona xaridi (`200`), qayta xarid (`409`), topilmagan xona (`404`) va sessiyasiz so‘rovni (`401`) tekshiramiz. 14-qadamda ikkinchi user birinchi userning xaridlarini ko‘rmasligini va admin xonani o‘chirgandan keyin ham xarid tarixda chiqishini sinaymiz.
 
 ## 1. `src/libs/types/order.ts`
 

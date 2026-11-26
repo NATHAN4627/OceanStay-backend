@@ -5,6 +5,7 @@ import { shapeIntoMongooseObjectId } from "../libs/config";
 import Errors, { HttpCode, Message } from "../libs/Errors";
 import RoomModel from "../schema/Room.model";
 import { RoomStatus } from "../libs/enums/room.enum";
+import { create } from "node:domain";
 
 class OrderService {
   private readonly orderModel;
@@ -45,6 +46,18 @@ class OrderService {
     });
 
     return savedOrder;
+  }
+
+  public async getOrders(id: ObjectId): Promise<Order[]> {
+    const memberId = shapeIntoMongooseObjectId(id);
+
+    const result = await this.orderModel
+      .find({ memberId })
+      .sort({ createdAt: -1 })
+      .lean()
+      .exec();
+
+    return result;
   }
 }
 
