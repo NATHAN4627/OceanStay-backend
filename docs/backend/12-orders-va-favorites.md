@@ -2,19 +2,18 @@
 
 Hozir `GET /room/all` xonalar ro‘yxatini, `GET /room/:id` esa xona tafsilotlarini beradi. Mehmon ham shu ikki API’ni ishlata oladi. `SOLD` xonaning tafsilotlari ochiladi, xarid esa faqat `AVAILABLE` xonalar uchun ishlaydi. Xarid va xarid tarixida `verifyAuth` faol sessiyani tekshiradi.
 
-Bu bosqichda bitta xona bir marta sotiladi. Demo xarid tasdiqlanganda xona `AVAILABLE`dan `SOLD`ga o‘tadi. Arxitektura hujjatidagi sanali hotel bronida xaridor xonani ma’lum kunlarga band qiladi. Agar keyin sanali bronga o‘tsak, mavjudlikni `checkIn` va `checkOut` orasidagi kunlar bo‘yicha hisoblaymiz.
+Bu bosqichda bitta xona bir marta sotiladi. Demo xarid tasdiqlanganda xona `AVAILABLE`dan `SOLD`ga o‘tadi va xaridorga tegishli `checkInDate` hamda `checkOutDate` `Order`ga yoziladi. Sana bo‘yicha xona bandligini hisoblash alohida bosqichga qoladi.
 
 ## Ma’lumot qayerda saqlanadi?
 
 | Kolleksiya | Nima saqlanadi? |
 | --- | --- |
 | `rooms` | Xonaning hozirgi tafsilotlari, narxi va sotuv holati. |
-| `orders` | `memberId`, `roomId`, xarid narxi `amount`, xarid paytidagi `orderRoomInfo` va sana. «Mening xaridlarim» shu kolleksiyani o‘qiydi. |
-| `favorites` | `memberId`, `roomId` va saqlangan sana. Har bir userning shaxsiy ro‘yxati. |
+| `orders` | `memberId`, `roomId`, `checkInDate`, `checkOutDate`, xarid narxi `amount`, xarid paytidagi `orderRoomInfo` va xarid vaqti. «Mening xaridlarim» shu kolleksiyani o‘qiydi. |
 
 `history` uchun alohida yozuv ochishga hojat yo‘q. Har bir `Order` allaqachon yakunlangan xaridni bildiradi. Xona keyin tahrirlansa yoki bazadan o‘chirilsa ham, tarix `orderRoomInfo`dan xarid paytidagi nom, raqam va turni, `amount`dan o‘sha narxni ko‘rsatadi.
 
-Favorites uchun alohida kolleksiya qulay. Bitta xona bir nechta userda saqlanishi mumkin, har bir user esa ko‘p xonani saqlashi mumkin. `{ memberId: 1, roomId: 1 }` unique indeksi bir user bitta xonani takroran saqlashining oldini oladi. Ro‘yxat xonaning joriy ma’lumotlarini ko‘rsatadi. Sotilgan xona `SOLD` bo‘lib ko‘rinadi. Bazadan o‘chirilgan xona ro‘yxatda chiqmaydi. [MongoDB unique indekslari](https://www.mongodb.com/docs/manual/core/index-unique/)
+Favorites frontendda ishlaydi. Brauzer `localStorage`ida akkaunt bo‘yicha xona ID’lari saqlanadi. Favorites sahifasi mavjud `GET /room/:id` orqali xonalarning joriy ma’lumotlarini oladi. Batafsil [15. Favorites va frontendga ulash](15-favorites-qoshish-va-olib-tashlash.md).
 
 ## API’larni yozish tartibi
 
@@ -23,11 +22,8 @@ Favorites uchun alohida kolleksiya qulay. Bitta xona bir nechta userda saqlanish
 | 12 | `Order` modeli | Type, schema va indekslarni tayyorlaymiz. |
 | 13 | [`POST /order/room/:id`](13-xona-xaridi.md) | Login qilgan user uchun demo xaridni yakunlaymiz. |
 | 14 | [`GET /orders`](14-xarid-tarixi.md) | O‘zining barcha xaridlarini yangisidan boshlab qaytaramiz. |
-| 15 | `POST /favorites/add/:roomId` | Xonani saqlaymiz. Ikkinchi bosishda ham bitta yozuv qoladi. |
-| 15 | `POST /favorites/remove/:roomId` | Userning o‘z ro‘yxatidan xonani olib tashlaymiz. |
-| 16 | `GET /favorites/my?page=1` | Mavjud xonalarni oxirgi saqlanganidan boshlab 10 tadan qaytaramiz. |
 
-Xarid, history va favorites uchun egasini `verifyAuth` to‘ldirgan `req.member._id`dan olamiz. Xarid so‘rovida Postman URL orqali xona ID’sini yuboradi. Service narxni bazadagi `roomPrice`dan oladi.
+Xarid va tarix uchun egasini `verifyAuth` to‘ldirgan `req.member._id`dan olamiz. Xarid so‘rovida xona ID’si URL’dan, kelish va chiqish sanalari JSON body’dan keladi. Service narxni bazadagi `roomPrice`dan oladi.
 
 Demo xaridda service `_id` va `roomStatus: AVAILABLE` bo‘yicha xonani `SOLD` qiladi, keyin `Order` yozadi. `AVAILABLE` sharti ikki parallel so‘rov bitta xonani yangilashiga yo‘l qo‘ymaydi. Bu variantda yozuvlar alohida bajariladi. Order yozishda xato chiqsa, xona `SOLD` bo‘lib qolishi va xarid tarixiga tushmasligi mumkin. [MongoDB yozuvlarining atomarligi](https://www.mongodb.com/docs/manual/core/write-operations-atomicity/)
 
@@ -51,6 +47,8 @@ export interface Order {
   _id: ObjectId;
   memberId: ObjectId;
   roomId: ObjectId;
+  checkInDate?: string;
+  checkOutDate?: string;
   amount: number;
   orderRoomInfo: OrderRoomInfo;
   createdAt: Date;
@@ -82,6 +80,8 @@ const orderSchema = new Schema<Order>(
       required: true,
       unique: true,
     },
+    checkInDate: { type: String, required: true },
+    checkOutDate: { type: String, required: true },
     amount: { type: Number, required: true, min: 0, validate: Number.isFinite },
     orderRoomInfo: { type: orderRoomInfo, required: true },
   },
@@ -95,6 +95,7 @@ export default mongoose.model("Order", orderSchema);
 
 - `ref: "Member"` va `ref: "Room"` ID’lar qaysi modellarga tegishli ekanini belgilaydi.
 - `orderRoomInfo` shu order ichidagi subdocument sifatida saqlanadi.
+- `checkInDate` va `checkOutDate` yangi order uchun majburiy. TypeScript’dagi `?` eski orderlarni ham o‘qiy olish uchun bor.
 - `amount` majburiy va `min: 0`. Har bir orderga bazadagi xona narxini yozamiz.
 - `roomId`dagi `unique: true` bir xona uchun ko‘pi bilan bitta order yozilishini bazada kafolatlaydigan indeksni belgilaydi. Xarid API’sini sinashdan oldin indeks bazada yaratilganini tekshiramiz. [MongoDB unique indekslari](https://www.mongodb.com/docs/manual/core/index-unique/)
 - `timestamps: true` `createdAt` va `updatedAt`ni avtomatik qo‘shadi. Oxirgi indeks userning xaridlarini yangi sanadan eski sanaga saralashga mos. Bir xil sanada `_id` tartibni barqaror qiladi.

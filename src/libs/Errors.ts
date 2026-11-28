@@ -29,6 +29,7 @@ export enum Message {
   ADMIN_ONLY = "Admin access is required!",
   INVALID_MEMBER_STATUS = "INVALID_MEMBER_STATUS",
   INVALID_ROOM_ID = "Invalid room ID.",
+  INVALID_STAY_DATES = "Enter valid check-in and check-out dates (YYYY-MM-DD). Check-out must be after check-in.",
   ROOM_NOT_AVAILABLE = "This room is no longer available.",
   INVALID_ROOM_PRICE = "This room does not have a valid price.",
   USER_ONLY = "A user account is required.",

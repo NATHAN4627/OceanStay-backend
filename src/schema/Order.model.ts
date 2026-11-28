@@ -32,6 +32,14 @@ const orderSchema = new Schema<Order>(
       required: true,
       unique: true,
     },
+    checkInDate: {
+      type: String,
+      required: true,
+    },
+    checkOutDate: {
+      type: String,
+      required: true,
+    },
     amount: {
       type: Number,
       required: true,

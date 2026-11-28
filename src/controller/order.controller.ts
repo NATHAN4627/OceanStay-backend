@@ -12,8 +12,14 @@ orderController.buyRoom = async (req: ExtendedRequest, res: Response) => {
   try {
     const { member } = req;
     const { id } = req.params;
+    const { checkInDate, checkOutDate } = req.body ?? {};
 
-    const result = await orderService.buyRoom(member._id, id as string);
+    const result = await orderService.buyRoom(
+      member._id,
+      id as string,
+      checkInDate,
+      checkOutDate,
+    );
 
     res.status(HttpCode.OK).json(result);
   } catch (err) {
